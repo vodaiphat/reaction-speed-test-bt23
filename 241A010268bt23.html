@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bài tập 23 - Reaction Speed Test</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 35px 15px;
+}
+
+h1 {
+    color: #38e8ff;
+    margin-bottom: 10px;
+}
+
+.description {
+    color: #cbd5e1;
+    margin-bottom: 25px;
+}
+
+.info {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.info div {
+    background: #ffffff18;
+    border: 1px solid #ffffff30;
+    border-radius: 12px;
+    padding: 15px 30px;
+    min-width: 140px;
+}
+
+.info h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #a5f3fc;
+}
+
+.info span {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#arena {
+    width: 600px;
+    height: 400px;
+    max-width: 100%;
+    margin: auto;
+    position: relative;
+    overflow: hidden;
+    background: #e2e8f0;
+    border: 4px solid #38e8ff;
+    border-radius: 15px;
+    cursor: crosshair;
+    box-shadow: 0 0 25px #38e8ff40;
+}
+
+#target {
+    width: 35px;
+    height: 35px;
+    background: #ef4444;
+    border: 3px solid white;
+    border-radius: 50%;
+    position: absolute;
+    display: none;
+    cursor: pointer;
+    box-shadow: 0 0 15px #ef4444;
+    transition: transform 0.1s;
+}
+
+#target:hover {
+    transform: scale(1.12);
+}
+
+button {
+    margin-top: 22px;
+    padding: 13px 30px;
+    border: none;
+    border-radius: 10px;
+    background: #06b6d4;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0891b2;
+}
+
+button:disabled {
+    background: #64748b;
+    cursor: not-allowed;
+}
+
+#message {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #fde68a;
+    font-weight: bold;
+}
+
+@media (max-width: 640px) {
+    #arena {
+        height: 350px;
+    }
+
+    .info {
+        gap: 8px;
+    }
+
+    .info div {
+        min-width: 0;
+        padding: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<h1>⚡ REACTION SPEED TEST</h1>
+<p class="description">
+    Thử thách tốc độ phản xạ của bạn trong 30 giây!
+</p>
+
+<div class="info">
+    <div>
+        <h3>🏆 ĐIỂM SỐ</h3>
+        <span id="score">0</span>
+    </div>
+
+    <div>
+        <h3>⏱ THỜI GIAN</h3>
+        <span id="time">30</span>
+    </div>
+</div>
+
+<div id="arena">
+    <div id="target"></div>
+</div>
+
+<button id="startBtn" onclick="startGame()">
+    Bắt đầu trò chơi
+</button>
+
+<div id="message">
+    Nhấn bắt đầu để thử sức nhé!
+</div>
+
+<script>
+const arena = document.getElementById("arena");
+const target = document.getElementById("target");
+const scoreDisplay = document.getElementById("score");
+const timeDisplay = document.getElementById("time");
+const startBtn = document.getElementById("startBtn");
+const message = document.getElementById("message");
+
+let score = 0;
+let timeLeft = 30;
+let timer = null;
+let gameRunning = false;
+
+// Sinh mục tiêu tại vị trí ngẫu nhiên
+function moveTarget() {
+    const maxLeft = arena.clientWidth - target.offsetWidth;
+    const maxTop = arena.clientHeight - target.offsetHeight;
+
+    const left = Math.random() * maxLeft;
+    const top = Math.random() * maxTop;
+
+    target.style.left = left + "px";
+    target.style.top = top + "px";
+}
+
+// Bắt đầu trò chơi
+function startGame() {
+    clearInterval(timer);
+
+    score = 0;
+    timeLeft = 30;
+    gameRunning = true;
+
+    scoreDisplay.textContent = score;
+    timeDisplay.textContent = timeLeft;
+
+    message.textContent = "Nhanh tay click vào mục tiêu!";
+    startBtn.disabled = true;
+    startBtn.textContent = "Đang chơi...";
+
+    target.style.display = "block";
+    moveTarget();
+
+    // Đếm ngược 30 giây
+    timer = setInterval(function() {
+        timeLeft--;
+        timeDisplay.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+            endGame();
+        }
+    }, 1000);
+}
+
+// Xử lý click trúng mục tiêu
+target.addEventListener("click", function(event) {
+    if (!gameRunning) return;
+
+    event.stopPropagation();
+
+    score++;
+    scoreDisplay.textContent = score;
+
+    // Mục tiêu đổi vị trí ngay lập tức
+    moveTarget();
+});
+
+// Kết thúc trò chơi
+function endGame() {
+    clearInterval(timer);
+
+    gameRunning = false;
+    target.style.display = "none";
+
+    startBtn.disabled = false;
+    startBtn.textContent = "Chơi lại";
+
+    message.textContent =
+        "🎉 Hết giờ! Bạn đạt được " + score + " điểm!";
+}
+
+// Không cho thao tác khi game chưa bắt đầu
+// hoặc đã kết thúc
+arena.addEventListener("click", function() {
+    if (!gameRunning) return;
+});
+
+</script>
+
+</body>
+</html>
